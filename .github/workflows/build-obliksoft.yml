@@ -125,7 +125,8 @@ jobs:
 
       - name: Build RustDesk (Flutter, x64)
         run: |
-          python3 .\build.py --portable --flutter --skip-portable-pack --hwcodec --vram
+          python3 .\build.py --portable --flutter --skip-portable-pack --hwcodec --vram 2>&1 | Tee-Object -FilePath build.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           mv ./flutter/build/windows/x64/runner/Release ./rustdesk
 
           Invoke-WebRequest -Uri https://github.com/rustdesk-org/rdev/releases/download/usbmmidd_v2/usbmmidd_v2.zip -OutFile usbmmidd_v2.zip
@@ -133,6 +134,12 @@ jobs:
           Remove-Item -Path usbmmidd_v2\Win32 -Recurse
           Remove-Item -Path "usbmmidd_v2\deviceinstaller64.exe", "usbmmidd_v2\deviceinstaller.exe", "usbmmidd_v2\usbmmidd.bat"
           mv -Force .\usbmmidd_v2 ./rustdesk
+
+      - name: Show build errors
+        if: failure()
+        shell: bash
+        run: |
+          grep -iE "error|exception|could not|failed|unable" build.log | grep -v "warning" | tail -n 25 | cut -c1-400 | while IFS= read -r l; do echo "::error::$l"; done
 
       - name: Find Runner.res
         # Runner.res (compiled from flutter/windows/runner/Runner.rc) carries the version info
