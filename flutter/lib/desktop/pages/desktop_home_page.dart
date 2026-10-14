@@ -284,7 +284,7 @@ class _DesktopHomePageState extends State<DesktopHomePage>
     Widget link(String text, String url) => MouseRegion(
           cursor: SystemMouseCursors.click,
           child: GestureDetector(
-            onTap: () => launchUrlString(url),
+            onTap: () => launchUrl(Uri.parse(url)),
             child: Text(text,
                 style: linkStyle.copyWith(color: MyTheme.accent)),
           ),
