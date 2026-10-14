@@ -1,0 +1,44 @@
+name: Quick Dart check (OblikSoft)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "flutter/**"
+      - ".github/workflows/check-dart-obliksoft.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  generate-bridge:
+    uses: ./.github/workflows/bridge.yml
+
+  analyze:
+    needs: [generate-bridge]
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          submodules: recursive
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: bridge-artifact
+          path: ./
+      - uses: subosito/flutter-action@2783a3f08e1baf891508463f8c6653c258246225 # v2.12.0
+        with:
+          channel: "stable"
+          flutter-version: "3.24.5"
+      - name: Analyze Dart
+        working-directory: flutter
+        shell: bash
+        run: |
+          flutter pub get 2>&1 | tail -n 3
+          flutter analyze --no-fatal-infos --no-fatal-warnings lib/desktop/pages lib/common.dart > ../analyze.log 2>&1 || true
+          grep -E "error •" ../analyze.log | head -n 20 | cut -c1-300 > ../errors.txt || true
+          cat ../errors.txt
+          if [ -s ../errors.txt ]; then
+            python3 -c "t=open('../errors.txt').read().replace('%','%25').replace('\n','%0A');print('::error title=dart analyze::'+t)"
+            exit 1
+          fi
