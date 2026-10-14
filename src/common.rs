@@ -2454,7 +2454,23 @@ pub fn rustdesk_interval(i: Interval) -> ThrottledInterval {
     ThrottledInterval::new(i)
 }
 
+/// Built-in connection defaults and branding for the OblikSoft Support build.
+/// Values go to `DEFAULT_SETTINGS`, so an explicit user choice still wins and
+/// nothing is read from the executable file name.
+fn apply_obliksoft_defaults() {
+    *config::APP_NAME.write().unwrap() = "OblikSoft Support".to_owned();
+    let mut settings = config::DEFAULT_SETTINGS.write().unwrap();
+    for (k, v) in [
+        ("custom-rendezvous-server", "obliksoft.com.ua"),
+        ("relay-server", "obliksoft.com.ua"),
+        ("key", "z2v6IvRt+cW1+sIDiwySThB8l6HRqn6EG0faIXgqjNM="),
+    ] {
+        settings.entry(k.to_owned()).or_insert_with(|| v.to_owned());
+    }
+}
+
 pub fn load_custom_client() {
+    apply_obliksoft_defaults();
     #[cfg(debug_assertions)]
     if let Ok(data) = std::fs::read_to_string("./custom.txt") {
         read_custom_client(data.trim());

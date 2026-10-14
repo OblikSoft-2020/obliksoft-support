@@ -603,7 +603,7 @@ class MyIdMenu: Reactor.Component {
             <div>Fingerprint: " + handler.get_fingerprint() + " \
             <div .link .custom-event url='https://rustdesk.com/privacy.html'>" + translate("Privacy Statement") + "</div> \
             <div .link .custom-event url='https://rustdesk.com'>" + translate("Website") + "</div> \
-	    <div style='background: #2c8cff; color: white; padding: 1em; margin-top: 1em;'>Copyright &copy; 2026 Purslane Tech Pte. Ltd.\
+	    <div style='background: #2c8cff; color: white; padding: 1em; margin-top: 1em;'>ОблікСофт Підтримка. Based on RustDesk (https://rustdesk.com)<br />Copyright &copy; Purslane Tech Pte. Ltd. / OblikSoft. Licensed under GPLv3\
             <br />" + handler.get_license() + " \
             <p style='font-weight: bold'>" + translate("Slogan_tip") + "</p>\
             </div>\
@@ -726,6 +726,11 @@ class App: Reactor.Component
                             {key_confirmed ? <input type="text" readonly value={formatId(get_id())}/> : translate("Generating ...")}
                         </div>}
                         {!outgoing_only && <PasswordArea />}
+                        {!outgoing_only && <div style="margin-top:1em">
+                            <div style="font-weight:bold">Технічна підтримка ОблікСофт</div>
+                            <div .link .obliksoft-link url="https://obliksoft.com.ua/support/" style="text-decoration:underline">https://obliksoft.com.ua/support/</div>
+                            <div .link .obliksoft-link url="https://obliksoft.com.ua/" style="text-decoration:underline">https://obliksoft.com.ua/</div>
+                        </div>}
                     </div>
                     {(!is_win || handler.is_installed() || disable_installation) ? "" : <InstallMe />}
                     {software_update_url && !disable_installation ? <UpdateMe /> : ""}
@@ -1341,6 +1346,11 @@ event change $(#msgbox input[name='confirmation']) {
 }
 
 $(body).content(<div style="size:*"><App /><div #msgbox /></div>);
+
+event click $(.obliksoft-link) {
+    var url = this.attributes['url'];
+    if (url) handler.open_url(url);
+}
 
 event click $(#powered-by) {
     handler.open_url("https://rustdesk.com");

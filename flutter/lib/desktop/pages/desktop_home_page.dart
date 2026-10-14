@@ -92,6 +92,7 @@ class _DesktopHomePageState extends State<DesktopHomePage>
       buildTip(context),
       if (!isOutgoingOnly) buildIDBoard(context),
       if (!isOutgoingOnly) buildPasswordBoard(context),
+      if (!isOutgoingOnly) buildObliksoftSupportCard(context),
       FutureBuilder<Widget>(
         future: Future.value(
             Obx(() => buildHelpCards(stateGlobal.updateUrl.value))),
@@ -275,6 +276,49 @@ class _DesktopHomePageState extends State<DesktopHomePage>
         ),
       ),
       onHover: (value) => hover.value = value,
+    );
+  }
+
+  Widget buildObliksoftSupportCard(BuildContext context) {
+    const linkStyle = TextStyle(decoration: TextDecoration.underline);
+    Widget link(String text, String url) => MouseRegion(
+          cursor: SystemMouseCursors.click,
+          child: GestureDetector(
+            onTap: () => launchUrlString(url),
+            child: Text(text,
+                style: linkStyle.copyWith(color: MyTheme.accent)),
+          ),
+        );
+    return Container(
+      margin: const EdgeInsets.only(left: 20, right: 16, top: 14),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 2,
+            height: 62,
+            decoration: const BoxDecoration(color: MyTheme.accent),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Технічна підтримка ОблікСофт',
+                    style: Theme.of(context)
+                        .textTheme
+                        .titleSmall
+                        ?.copyWith(fontWeight: FontWeight.w600)),
+                const SizedBox(height: 4),
+                link('https://obliksoft.com.ua/support/',
+                    'https://obliksoft.com.ua/support/'),
+                const SizedBox(height: 2),
+                link('https://obliksoft.com.ua/', 'https://obliksoft.com.ua/'),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 

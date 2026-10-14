@@ -2574,7 +2574,7 @@ class _AboutState extends State<_About> {
       final scrollController = ScrollController();
       return SingleChildScrollView(
         controller: scrollController,
-        child: _Card(title: translate('About RustDesk'), children: [
+        child: _Card(title: 'About OblikSoft Support (RustDesk core)', children: [
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -2622,7 +2622,7 @@ class _AboutState extends State<_About> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Copyright © ${DateTime.now().toString().substring(0, 4)} Purslane Tech Pte. Ltd.\n$license',
+                            'ОблікСофт Підтримка — збірка на основі RustDesk (https://rustdesk.com)\nCopyright © Purslane Tech Pte. Ltd. / OblikSoft. Licensed under GPLv3\n$license',
                             style: const TextStyle(color: Colors.white),
                           ),
                           Text(
