@@ -726,12 +726,12 @@ class App: Reactor.Component
                             {key_confirmed ? <input type="text" readonly value={formatId(get_id())}/> : translate("Generating ...")}
                         </div>}
                         {!outgoing_only && <PasswordArea />}
-                        {!outgoing_only && <div style="margin-top:1em">
+                        {!outgoing_only && <div style="margin-top:0.5em; font-size:0.8em; line-height:1.3em">
                             <div style="font-weight:bold">Технічна підтримка ОблікСофт</div>
-                            <div .link .obliksoft-link url="https://obliksoft.com.ua/support/" style="text-decoration:underline">https://obliksoft.com.ua/support/</div>
-                            <div .link .obliksoft-link url="https://obliksoft.com.ua/" style="text-decoration:underline">https://obliksoft.com.ua/</div>
-                            <div .link .obliksoft-link url="tel:+380502648400" style="text-decoration:underline">Тел.: +380 50 264 8400</div>
-                            <div .link .obliksoft-link url="https://t.me/OblikSoftSupportBot" style="text-decoration:underline">Telegram: @OblikSoftSupportBot</div>
+                            <div .link .obliksoft-link url="https://obliksoft.com.ua/support/" style="text-decoration:underline">obliksoft.com.ua/support</div>
+                            <div .link .obliksoft-link url="https://obliksoft.com.ua/" style="text-decoration:underline">obliksoft.com.ua</div>
+                            <div .link .obliksoft-link url="tel:+380502648400" style="text-decoration:underline">+380 50 264 8400</div>
+                            <div .link .obliksoft-link url="https://t.me/OblikSoftSupportBot" style="text-decoration:underline">@OblikSoftSupportBot</div>
                         </div>}
                     </div>
                     {(!is_win || handler.is_installed() || disable_installation) ? "" : <InstallMe />}
