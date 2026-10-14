@@ -25,6 +25,9 @@ import 'package:window_manager/window_manager.dart';
 import 'package:window_size/window_size.dart' as window_size;
 import '../widgets/button.dart';
 
+const _kTelegramIconB64 =
+    'iVBORw0KGgoAAAANSUhEUgAAAGAAAABgCAYAAADimHc4AAAC/0lEQVR4nO2d7XHbMAyGpVyHSCcIR0onbEYCJ6i3SK656GqnokSKIPHi4/0fy3weAqBkX7wuCvLy+8/7lb/Lv36uC3hWK7C1Slk9QEeWsXqDjiZj9Q5eWsS0i6GDlxIx/CLawM8WMezFtYOfJeJpxItagz9yTewCLMIfuTa2srIMfmRLYqkAb/A519wtwCN8zrV3CfAMn4vBZQEBn4fFJQEBn49Js4CAz8umSUDA52dULSDg16eF1ZBHEZH6VAmI3d+eWmanAgL+9dSwOxQQ8PtzxjBmgHCKAmL38+WIZVSAcHYFxO7/F3p9XjhSYvqD5dUNhpjAn+W/T3U8734qQE9vt2GfpEUFLMe7nRP+6Qzwtvvp9XlaqykxdlcBNBn4WdwIIDDwW1br7Yc6wI/s/9swNlkBBLrb92JKACkC/3AK0t5+SOA005uNueoKoIHQR5//t6gTQMp2uhkBZAy8GgFkFPyWFXEAkzD0Wf0frgLI+G6HFUAOwYsL8AxdVAA6+DSx/08VgA5eKkMFBHQhAQFeWECpj6KLSZP7//QhvLdAApdi/j4gOZcC99VEcgQfogJQwEv0f8gK8JYnhH9c5zV/2UcFCAdGQBLqwdLXhhGgAdbiXUD6gm9JwqcAjYM4vd1Ui9iYq6mAVIDdK0FaogoB6QSSNEQWAahtKFXC1SThnjVUBaRvEFuhapwLUAI8Vs2DAKQ2lJQP11K+M4asgMQED1XCoQDpKkjM0JAk7LGFrADu7A1nFDG7AqSrYFQkoZeYuqgAxJ2/5XCnI351XWOOOoq7CkDLoQCrs2BmzhieVkBIuJ4adlUtKCS0p5ZZzADhVAuIKqhPC6umCggJ/IyaW1BI4GVzaQaEBD4ml4dwSOBh0XUKCglLN4PuY6hnCZlh7Sz3AR4lZKY1s4Oz/gQ1M2829jthy9WQB6xtyKMIixLyoDXFT5pb/Ulz7bMhT6ri6a0CXUSe3D7FejWaiCw0tyCG5YuQDITDgvgbmC0DAfp9oN7MUshVKWiw9/IBY8BPaTTDOjAAAAAASUVORK5CYII=';
+
 class DesktopHomePage extends StatefulWidget {
   const DesktopHomePage({Key? key}) : super(key: key);
 
@@ -305,7 +308,14 @@ class _DesktopHomePageState extends State<DesktopHomePage>
         children: [
           row(Icons.language, link('obliksoft.com.ua', 'https://obliksoft.com.ua/support/')),
           row(Icons.phone, const SelectableText('+380 50 264 8400')),
-          row(Icons.send, link('Telegram', 'https://t.me/OblikSoftSupportBot')),
+          MouseRegion(
+            cursor: SystemMouseCursors.click,
+            child: GestureDetector(
+              onTap: () => launchUrl(Uri.parse('https://t.me/OblikSoftSupportBot')),
+              child: Image.memory(base64Decode(_kTelegramIconB64),
+                  width: 22, height: 22),
+            ),
+          ),
         ],
       ),
     );
