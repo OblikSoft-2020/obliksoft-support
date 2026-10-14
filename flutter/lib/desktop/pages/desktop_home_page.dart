@@ -280,51 +280,32 @@ class _DesktopHomePageState extends State<DesktopHomePage>
   }
 
   Widget buildObliksoftSupportCard(BuildContext context) {
-    const linkStyle = TextStyle(decoration: TextDecoration.underline);
+    Widget row(IconData icon, Widget child) => Padding(
+          padding: const EdgeInsets.only(bottom: 3),
+          child: Row(children: [
+            Icon(icon, size: 16, color: MyTheme.accent),
+            const SizedBox(width: 8),
+            child,
+          ]),
+        );
     Widget link(String text, String url) => MouseRegion(
           cursor: SystemMouseCursors.click,
           child: GestureDetector(
             onTap: () => launchUrl(Uri.parse(url)),
             child: Text(text,
-                style: linkStyle.copyWith(color: MyTheme.accent)),
+                style: const TextStyle(
+                    decoration: TextDecoration.underline,
+                    color: MyTheme.accent)),
           ),
         );
     return Container(
       margin: const EdgeInsets.only(left: 20, right: 16, top: 14),
-      child: Row(
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: 2,
-            height: 84,
-            decoration: const BoxDecoration(color: MyTheme.accent),
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                MouseRegion(
-                  cursor: SystemMouseCursors.click,
-                  child: GestureDetector(
-                    onTap: () =>
-                        launchUrl(Uri.parse('https://obliksoft.com.ua/support/')),
-                    child: Text('Технічна підтримка ОблікСофт',
-                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.w600,
-                            color: MyTheme.accent,
-                            decoration: TextDecoration.underline)),
-                  ),
-                ),
-                const SizedBox(height: 4),
-                link('obliksoft.com.ua', 'https://obliksoft.com.ua/'),
-                const SizedBox(height: 2),
-                const SelectableText('+380 50 264 8400'),
-                const SizedBox(height: 2),
-                link('Telegram', 'https://t.me/OblikSoftSupportBot'),
-              ],
-            ),
-          ),
+          row(Icons.language, link('obliksoft.com.ua', 'https://obliksoft.com.ua/support/')),
+          row(Icons.phone, const SelectableText('+380 50 264 8400')),
+          row(Icons.send, link('Telegram', 'https://t.me/OblikSoftSupportBot')),
         ],
       ),
     );
