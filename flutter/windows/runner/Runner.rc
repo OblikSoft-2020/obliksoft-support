@@ -93,7 +93,7 @@ BEGIN
             VALUE "FileDescription", "ОблікСофт Модуль віддаленої підтримки" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
             VALUE "InternalName", "rustdesk" "\0"
-            VALUE "LegalCopyright", "Copyright © OblikSoft / Licensed under GPLv3. Based on RustDesk, Copyright © Purslane Tech Pte. Ltd." "\0"
+            VALUE "LegalCopyright", "Copyright © OblikSoft / Licensed under AGPLv3. Based on RustDesk, Copyright © Purslane Tech Pte. Ltd." "\0"
             VALUE "OriginalFilename", "rustdesk.exe" "\0"
             VALUE "ProductName", "ОблікСофт Підтримка" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"

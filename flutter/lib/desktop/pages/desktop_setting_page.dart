@@ -2622,7 +2622,7 @@ class _AboutState extends State<_About> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'ОблікСофт Підтримка — збірка на основі RustDesk (https://rustdesk.com)\nCopyright © Purslane Tech Pte. Ltd. / OblikSoft. Licensed under GPLv3\n$license',
+                            'ОблікСофт Підтримка — збірка на основі RustDesk (https://rustdesk.com)\nCopyright © Purslane Tech Pte. Ltd. / OblikSoft. Licensed under AGPLv3\n$license',
                             style: const TextStyle(color: Colors.white),
                           ),
                           Text(

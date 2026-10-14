@@ -257,7 +257,7 @@ webrtc-sctp = { git = "https://github.com/rustdesk-org/webrtc", rev = "49c89bd8d
 
 [package.metadata.winres]
 CompanyName = "ТОВ Обліксофт 2020"
-LegalCopyright = "Copyright © OblikSoft / Licensed under GPLv3. Based on RustDesk, Copyright © Purslane Tech Pte. Ltd."
+LegalCopyright = "Copyright © OblikSoft / Licensed under AGPLv3. Based on RustDesk, Copyright © Purslane Tech Pte. Ltd."
 ProductName = "ОблікСофт Підтримка"
 FileDescription = "ОблікСофт Модуль віддаленої підтримки"
 OriginalFilename = "rustdesk.exe"
