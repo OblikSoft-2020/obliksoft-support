@@ -1,0 +1,28 @@
+name: Rename release assets (OblikSoft)
+
+# One-off helper: push a tag named rename-<release-tag> (for example
+# rename-obliksoft-v1.0.1) to rename OblikSoft-Support-* assets of that
+# release to OblikSoft-CS-* without rebuilding.
+on:
+  push:
+    tags:
+      - "rename-*"
+
+permissions:
+  contents: write
+
+jobs:
+  rename:
+    runs-on: ubuntu-22.04
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Rename assets
+        run: |
+          TAG="${GITHUB_REF_NAME#rename-}"
+          mkdir dl && cd dl
+          gh release download "$TAG" --repo "$GITHUB_REPOSITORY" --pattern 'OblikSoft-Support-*.exe'
+          for a in x64 x86; do mv "OblikSoft-Support-$a.exe" "OblikSoft-CS-$a.exe"; done
+          gh release upload "$TAG" --repo "$GITHUB_REPOSITORY" --clobber OblikSoft-CS-x64.exe OblikSoft-CS-x86.exe
+          for a in x64 x86; do gh release delete-asset "$TAG" "OblikSoft-Support-$a.exe" --repo "$GITHUB_REPOSITORY" -y; done
+          gh release view "$TAG" --repo "$GITHUB_REPOSITORY" --json assets --jq '.assets[].name'
