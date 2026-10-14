@@ -296,7 +296,7 @@ class _DesktopHomePageState extends State<DesktopHomePage>
         children: [
           Container(
             width: 2,
-            height: 100,
+            height: 84,
             decoration: const BoxDecoration(color: MyTheme.accent),
           ),
           const SizedBox(width: 8),
@@ -304,19 +304,24 @@ class _DesktopHomePageState extends State<DesktopHomePage>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Технічна підтримка ОблікСофт',
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleSmall
-                        ?.copyWith(fontWeight: FontWeight.w600)),
+                MouseRegion(
+                  cursor: SystemMouseCursors.click,
+                  child: GestureDetector(
+                    onTap: () =>
+                        launchUrl(Uri.parse('https://obliksoft.com.ua/support/')),
+                    child: Text('Технічна підтримка ОблікСофт',
+                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.w600,
+                            color: MyTheme.accent,
+                            decoration: TextDecoration.underline)),
+                  ),
+                ),
                 const SizedBox(height: 4),
-                link('obliksoft.com.ua/support', 'https://obliksoft.com.ua/support/'),
-                const SizedBox(height: 2),
                 link('obliksoft.com.ua', 'https://obliksoft.com.ua/'),
                 const SizedBox(height: 2),
-                link('+380 50 264 8400', 'tel:+380502648400'),
+                const SelectableText('+380 50 264 8400'),
                 const SizedBox(height: 2),
-                link('@OblikSoftSupportBot', 'https://t.me/OblikSoftSupportBot'),
+                link('Telegram', 'https://t.me/OblikSoftSupportBot'),
               ],
             ),
           ),
