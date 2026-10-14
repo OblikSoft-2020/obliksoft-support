@@ -296,7 +296,7 @@ class _DesktopHomePageState extends State<DesktopHomePage>
         children: [
           Container(
             width: 2,
-            height: 62,
+            height: 100,
             decoration: const BoxDecoration(color: MyTheme.accent),
           ),
           const SizedBox(width: 8),
@@ -314,6 +314,11 @@ class _DesktopHomePageState extends State<DesktopHomePage>
                     'https://obliksoft.com.ua/support/'),
                 const SizedBox(height: 2),
                 link('https://obliksoft.com.ua/', 'https://obliksoft.com.ua/'),
+                const SizedBox(height: 2),
+                link('Тел.: +380 50 264 8400', 'tel:+380502648400'),
+                const SizedBox(height: 2),
+                link('Telegram: @OblikSoftSupportBot',
+                    'https://t.me/OblikSoftSupportBot'),
               ],
             ),
           ),
