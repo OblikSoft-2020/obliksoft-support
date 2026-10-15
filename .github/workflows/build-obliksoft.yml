@@ -50,6 +50,7 @@ jobs:
     env:
       OBLIKSOFT_VARIANT: ${{ matrix.variant }}
       PKG: ${{ matrix.variant == 'staff' && 'OblikSoft-CS-Staff' || 'OblikSoft-CS' }}
+      APPNAME: ${{ matrix.variant == 'staff' && 'OblikSoftCSStaff' || 'OblikSoftCS' }}
     needs: [generate-bridge, build-topmost-window]
     runs-on: windows-2022
     steps:
@@ -167,12 +168,28 @@ jobs:
         shell: bash
         run: |
           sed -i '/dpiAware/d' res/manifest.xml
+          # The main exe must be named like the app (APP_NAME) so the installer needs no rename step
+          mv ./rustdesk/rustdesk.exe ./rustdesk/${APPNAME}.exe
           pushd ./libs/portable
           pip3 install -r requirements.txt
-          python3 ./generate.py -f ../../rustdesk/ -o . -e ../../rustdesk/rustdesk.exe
+          python3 ./generate.py -f ../../rustdesk/ -o . -e ../../rustdesk/${APPNAME}.exe
           popd
           mkdir -p ./out
           mv ./target/release/rustdesk-portable-packer.exe ./out/${PKG}-x64.exe
+
+      - name: Smoke test silent install
+        continue-on-error: true
+        shell: pwsh
+        run: |
+          $exe = Resolve-Path ".\out\$($env:PKG)-x64.exe"
+          Start-Process -FilePath $exe -ArgumentList "--silent-install"
+          Start-Sleep -Seconds 90
+          $dir = "C:\Program Files\$($env:APPNAME)"
+          $files = if (Test-Path $dir) { (Get-ChildItem $dir | Select-Object -First 15 | ForEach-Object Name) -join ", " } else { "NO DIR" }
+          $svc = (Get-Service | Where-Object { $_.Name -like "*$($env:APPNAME)*" -or $_.DisplayName -like "*$($env:APPNAME)*" } | ForEach-Object { "$($_.Name)=$($_.Status)" }) -join ", "
+          $running = (Get-Process | Where-Object { $_.ProcessName -like "$($env:APPNAME)*" } | ForEach-Object ProcessName) -join ", "
+          Write-Output "::warning title=install smoke ($env:APPNAME)::dir=$dir files=[$files] services=[$svc] processes=[$running]"
+          if (-not (Test-Path "$dir\$($env:APPNAME).exe")) { Write-Output "::error::$($env:APPNAME).exe missing in install dir" }
 
       - name: Upload artifact
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
@@ -194,6 +211,7 @@ jobs:
     env:
       OBLIKSOFT_VARIANT: ${{ matrix.variant }}
       PKG: ${{ matrix.variant == 'staff' && 'OblikSoft-CS-Staff' || 'OblikSoft-CS' }}
+      APPNAME: ${{ matrix.variant == 'staff' && 'OblikSoftCSStaff' || 'OblikSoftCS' }}
     runs-on: windows-2022
     steps:
       - name: Export GitHub Actions cache environment variables
@@ -262,12 +280,27 @@ jobs:
         shell: bash
         run: |
           sed -i '/dpiAware/d' res/manifest.xml
+          mv ./Release/rustdesk.exe ./Release/${APPNAME}.exe
           pushd ./libs/portable
           pip3 install -r requirements.txt
-          python3 ./generate.py -f ../../Release/ -o . -e ../../Release/rustdesk.exe
+          python3 ./generate.py -f ../../Release/ -o . -e ../../Release/${APPNAME}.exe
           popd
           mkdir -p ./out
           mv ./target/release/rustdesk-portable-packer.exe ./out/${PKG}-x86.exe
+
+      - name: Smoke test silent install
+        continue-on-error: true
+        shell: pwsh
+        run: |
+          $exe = Resolve-Path ".\out\$($env:PKG)-x86.exe"
+          Start-Process -FilePath $exe -ArgumentList "--silent-install"
+          Start-Sleep -Seconds 90
+          $dir = "C:\Program Files\$($env:APPNAME)"
+          $files = if (Test-Path $dir) { (Get-ChildItem $dir | Select-Object -First 15 | ForEach-Object Name) -join ", " } else { "NO DIR" }
+          $svc = (Get-Service | Where-Object { $_.Name -like "*$($env:APPNAME)*" -or $_.DisplayName -like "*$($env:APPNAME)*" } | ForEach-Object { "$($_.Name)=$($_.Status)" }) -join ", "
+          $running = (Get-Process | Where-Object { $_.ProcessName -like "$($env:APPNAME)*" } | ForEach-Object ProcessName) -join ", "
+          Write-Output "::warning title=install smoke ($env:APPNAME)::dir=$dir files=[$files] services=[$svc] processes=[$running]"
+          if (-not (Test-Path "$dir\$($env:APPNAME).exe")) { Write-Output "::error::$($env:APPNAME).exe missing in install dir" }
 
       - name: Upload artifact
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
