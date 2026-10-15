@@ -8,6 +8,10 @@ on:
         type: string
         default: ""
 
+  push:
+    tags:
+      - "obliksoft-mac-*"
+
 permissions:
   contents: read
 
@@ -131,7 +135,7 @@ jobs:
           if-no-files-found: error
 
       - name: Attach to release
-        if: ${{ inputs.release-tag != '' }}
+        if: ${{ github.event_name == 'push' || inputs.release-tag != '' }}
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release upload "${{ inputs.release-tag }}" OblikSoft-CS-macos-arm64.dmg --clobber --repo "$GITHUB_REPOSITORY"
+        run: gh release upload "${{ github.event_name == 'push' && 'obliksoft-v1.0.1' || inputs.release-tag }}" OblikSoft-CS-macos-arm64.dmg --clobber --repo "$GITHUB_REPOSITORY"
