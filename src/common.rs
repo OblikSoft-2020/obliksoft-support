@@ -2480,6 +2480,7 @@ fn apply_obliksoft_defaults() {
         ("custom-rendezvous-server", "obliksoft.com.ua"),
         ("relay-server", "obliksoft.com.ua"),
         ("api-server", "https://rd.obliksoft.com.ua"),
+        ("allow-remote-config-modification", "Y"),
         ("key", "z2v6IvRt+cW1+sIDiwySThB8l6HRqn6EG0faIXgqjNM="),
     ] {
         settings.entry(k.to_owned()).or_insert_with(|| v.to_owned());
