@@ -1,3 +1,22 @@
+# OblikSoft Support
+
+**OblikSoft Support** (ОблікСофт Підтримка) is a remote-support client for the customers of OblikSoft 2020 LLC (Poltava, Ukraine). It is a branded build of the open-source [RustDesk](https://github.com/rustdesk/rustdesk) client, preconfigured to connect to OblikSoft's own ID/relay servers. Changes against upstream: default connection settings, branding, and a support contact panel. License: GNU AGPL-3.0 (inherited from upstream).
+
+- Download page: https://obliksoft.com.ua/support/
+- Releases: https://github.com/OblikSoft-2020/obliksoft-support/releases
+- Support: +380 50 264 8400, https://t.me/OblikSoftSupportBot
+
+## Code signing policy
+
+Free code signing provided by [SignPath.io](https://about.signpath.org/), certificate by [SignPath Foundation](https://signpath.org/).
+
+- Authors, reviewers and approvers: Aleksandr Pertsyukh
+- Binaries are built from this repository by GitHub Actions (`.github/workflows/build-obliksoft.yml`); every release is approved manually before signing.
+
+**Privacy policy:** this program connects only to the OblikSoft ID/relay servers (`obliksoft.com.ua`, `rd.obliksoft.com.ua`) and does not transfer data to any other system. Remote sessions start only on explicit user action. The program adds no analytics or third-party telemetry.
+
+---
+
 <p align="center">
   <img src="res/logo-header.svg" alt="RustDesk - Your remote desktop"><br>
   <a href="#raw-steps-to-build">Build</a> •
