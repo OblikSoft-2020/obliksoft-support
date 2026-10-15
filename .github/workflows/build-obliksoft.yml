@@ -42,7 +42,14 @@ jobs:
   # x64: Flutter UI. Target x86_64-pc-windows-msvc
   # ---------------------------------------------------------------------------
   build-windows-x64:
-    name: x86_64-pc-windows-msvc (Flutter)
+    name: x86_64-pc-windows-msvc (Flutter) ${{ matrix.variant }}
+    strategy:
+      fail-fast: false
+      matrix:
+        variant: [client, staff]
+    env:
+      OBLIKSOFT_VARIANT: ${{ matrix.variant }}
+      PKG: ${{ matrix.variant == 'staff' && 'OblikSoft-CS-Staff' || 'OblikSoft-CS' }}
     needs: [generate-bridge, build-topmost-window]
     runs-on: windows-2022
     steps:
@@ -104,7 +111,7 @@ jobs:
 
       - uses: Swatinem/rust-cache@e18b497796c12c097a38f9edb9d0641fb99eee32 # v2
         with:
-          prefix-key: obliksoft-windows-2022-x64
+          prefix-key: obliksoft-windows-2022-x64-${{ matrix.variant }}
 
       - name: Setup vcpkg with Github Actions binary cache
         uses: lukka/run-vcpkg@b1a0dd252f06b9e25b3c022a9a03bd7a427fb6a2 # v11
@@ -165,13 +172,13 @@ jobs:
           python3 ./generate.py -f ../../rustdesk/ -o . -e ../../rustdesk/rustdesk.exe
           popd
           mkdir -p ./out
-          mv ./target/release/rustdesk-portable-packer.exe ./out/OblikSoft-CS-x64.exe
+          mv ./target/release/rustdesk-portable-packer.exe ./out/${PKG}-x64.exe
 
       - name: Upload artifact
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: OblikSoft-CS-x64
-          path: ./out/OblikSoft-CS-x64.exe
+          name: ${{ env.PKG }}-x64
+          path: ./out/${{ env.PKG }}-x64.exe
           if-no-files-found: error
 
   # ---------------------------------------------------------------------------
@@ -179,7 +186,14 @@ jobs:
   # uses the Sciter UI (src/ui/*). Target i686-pc-windows-msvc
   # ---------------------------------------------------------------------------
   build-windows-x86:
-    name: i686-pc-windows-msvc (Sciter)
+    name: i686-pc-windows-msvc (Sciter) ${{ matrix.variant }}
+    strategy:
+      fail-fast: false
+      matrix:
+        variant: [client, staff]
+    env:
+      OBLIKSOFT_VARIANT: ${{ matrix.variant }}
+      PKG: ${{ matrix.variant == 'staff' && 'OblikSoft-CS-Staff' || 'OblikSoft-CS' }}
     runs-on: windows-2022
     steps:
       - name: Export GitHub Actions cache environment variables
@@ -209,7 +223,7 @@ jobs:
 
       - uses: Swatinem/rust-cache@e18b497796c12c097a38f9edb9d0641fb99eee32 # v2
         with:
-          prefix-key: obliksoft-windows-2022-sciter
+          prefix-key: obliksoft-windows-2022-sciter-${{ matrix.variant }}
 
       - name: Setup vcpkg with Github Actions binary cache
         uses: lukka/run-vcpkg@b1a0dd252f06b9e25b3c022a9a03bd7a427fb6a2 # v11
@@ -253,13 +267,13 @@ jobs:
           python3 ./generate.py -f ../../Release/ -o . -e ../../Release/rustdesk.exe
           popd
           mkdir -p ./out
-          mv ./target/release/rustdesk-portable-packer.exe ./out/OblikSoft-CS-x86.exe
+          mv ./target/release/rustdesk-portable-packer.exe ./out/${PKG}-x86.exe
 
       - name: Upload artifact
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: OblikSoft-CS-x86
-          path: ./out/OblikSoft-CS-x86.exe
+          name: ${{ env.PKG }}-x86
+          path: ./out/${{ env.PKG }}-x86.exe
           if-no-files-found: error
 
   # ---------------------------------------------------------------------------
@@ -286,5 +300,4 @@ jobs:
           tag_name: ${{ github.event_name == 'push' && github.ref_name || inputs.release-tag }}
           prerelease: false
           files: |
-            dist/OblikSoft-CS-x64.exe
-            dist/OblikSoft-CS-x86.exe
+            dist/OblikSoft-CS-*.exe

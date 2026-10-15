@@ -2454,11 +2454,27 @@ pub fn rustdesk_interval(i: Interval) -> ThrottledInterval {
     ThrottledInterval::new(i)
 }
 
-/// Built-in connection defaults and branding for the OblikSoft Support build.
+/// Built-in connection defaults and branding for the OblikSoft build.
 /// Values go to `DEFAULT_SETTINGS`, so an explicit user choice still wins and
 /// nothing is read from the executable file name.
+///
+/// Two variants are produced at compile time via the `OBLIKSOFT_VARIANT` env var:
+/// - `client` (default): incoming connections only, for customers (published on the site);
+/// - `staff`: full client with outgoing connections, for employees.
+/// The app name must not contain spaces (installer, service and shortcut names break).
 fn apply_obliksoft_defaults() {
-    *config::APP_NAME.write().unwrap() = "OblikSoft Support".to_owned();
+    let staff = option_env!("OBLIKSOFT_VARIANT") == Some("staff");
+    *config::APP_NAME.write().unwrap() = if staff {
+        "OblikSoftCSStaff".to_owned()
+    } else {
+        "OblikSoftCS".to_owned()
+    };
+    if !staff {
+        config::HARD_SETTINGS
+            .write()
+            .unwrap()
+            .insert("conn-type".to_owned(), "incoming".to_owned());
+    }
     let mut settings = config::DEFAULT_SETTINGS.write().unwrap();
     for (k, v) in [
         ("custom-rendezvous-server", "obliksoft.com.ua"),
