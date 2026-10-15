@@ -2476,11 +2476,17 @@ fn apply_obliksoft_defaults() {
             .insert("conn-type".to_owned(), "incoming".to_owned());
     }
     let mut settings = config::DEFAULT_SETTINGS.write().unwrap();
+    if !staff {
+        // Consultants must be able to change settings on customer PCs remotely
+        // (e.g. set a permanent password); employees' own builds keep the safe default.
+        settings
+            .entry("allow-remote-config-modification".to_owned())
+            .or_insert_with(|| "Y".to_owned());
+    }
     for (k, v) in [
         ("custom-rendezvous-server", "obliksoft.com.ua"),
         ("relay-server", "obliksoft.com.ua"),
         ("api-server", "https://rd.obliksoft.com.ua"),
-        ("allow-remote-config-modification", "Y"),
         ("key", "z2v6IvRt+cW1+sIDiwySThB8l6HRqn6EG0faIXgqjNM="),
     ] {
         settings.entry(k.to_owned()).or_insert_with(|| v.to_owned());
