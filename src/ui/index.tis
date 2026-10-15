@@ -1511,7 +1511,54 @@ function check_if_overlay() {
     }
 }
 
+// OblikSoft: first-run ID setup for the customer (incoming-only) build.
+// ID = e<EDRPOU>_<NN> or i<RNOKPP>_<NN> (a custom ID must start with a letter).
+function obliksoftIdSetup() {
+    if (!incoming_only) return;
+    if (handler.get_local_option("obliksoft-id-setup-done") == "Y") return;
+    if (!(key_confirmed && connect_status > 0 && handler.is_ok_change_id())) {
+        self.timer(3s, obliksoftIdSetup);
+        return;
+    }
+    var width = (incoming_only_width - 20) + "px";
+    msgbox("custom-skip-obliksoft-id", "Налаштування ідентифікатора", "<div .form .set-password> \
+        <div>Вкажіть код організації та номер комп'ютера. Можна пропустити: тоді залишиться випадковий ID.</div> \
+        <div>ЄДРПОУ (8 цифр) або РНОКПП (10 цифр):</div> \
+        <div><input|text .outline-focus style='width: " + width + "' name='code' /></div> \
+        <div>Номер комп'ютера (01-99):</div> \
+        <div><input|text style='width: " + width + "' name='num' value='01' /></div> \
+        </div> \
+        ", "", function(res=null, show_progress) {
+            if (!res || res.skip) {
+                handler.set_local_option("obliksoft-id-setup-done", "Y");
+                return;
+            }
+            var code = (res.code || "").trim();
+            var num = (res.num || "").trim();
+            if (!/^(\d{8}|\d{10})$/.test(code)) return "Вкажіть ЄДРПОУ (8 цифр) або РНОКПП (10 цифр)";
+            if (!/^\d{1,2}$/.test(num) || num.toInteger() < 1) return "Номер комп'ютера: від 01 до 99";
+            if (num.length < 2) num = "0" + num;
+            var new_id = (code.length == 8 ? "e" : "i") + code + "_" + num;
+            show_progress();
+            handler.change_id(new_id);
+            function check_status() {
+                var status = handler.get_async_job_status();
+                if (status == " ") self.timer(0.1s, check_status);
+                else if (status) {
+                    var m = status.toLowerCase().indexOf("exist") >= 0 ? "Такий ID вже зайнятий. Оберіть інший номер комп'ютера." : translate(status);
+                    show_progress(false, m);
+                } else {
+                    handler.set_local_option("obliksoft-id-setup-done", "Y");
+                    show_progress(-1);
+                }
+            }
+            check_status();
+            return " ";
+        }, msgbox_default_height, get_msgbox_width());
+}
+
 checkConnectStatus();
+obliksoftIdSetup();
 
 function set_local_user_info(user) {
     var user_info = {name: user.name};
