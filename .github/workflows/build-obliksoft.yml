@@ -177,20 +177,6 @@ jobs:
           mkdir -p ./out
           mv ./target/release/rustdesk-portable-packer.exe ./out/${PKG}-x64.exe
 
-      - name: Smoke test silent install
-        continue-on-error: true
-        shell: pwsh
-        run: |
-          $exe = Resolve-Path ".\out\$($env:PKG)-x64.exe"
-          Start-Process -FilePath $exe -ArgumentList "--silent-install"
-          Start-Sleep -Seconds 90
-          $dir = "C:\Program Files\$($env:APPNAME)"
-          $files = if (Test-Path $dir) { (Get-ChildItem $dir | Select-Object -First 15 | ForEach-Object Name) -join ", " } else { "NO DIR" }
-          $svc = (Get-Service | Where-Object { $_.Name -like "*$($env:APPNAME)*" -or $_.DisplayName -like "*$($env:APPNAME)*" } | ForEach-Object { "$($_.Name)=$($_.Status)" }) -join ", "
-          $running = (Get-Process | Where-Object { $_.ProcessName -like "$($env:APPNAME)*" } | ForEach-Object ProcessName) -join ", "
-          Write-Output "::warning title=install smoke ($env:APPNAME)::dir=$dir files=[$files] services=[$svc] processes=[$running]"
-          if (-not (Test-Path "$dir\$($env:APPNAME).exe")) { Write-Output "::error::$($env:APPNAME).exe missing in install dir" }
-
       - name: Upload artifact
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
@@ -263,18 +249,27 @@ jobs:
       - name: Build RustDesk (Sciter, x86)
         shell: bash
         run: |
-          python3 res/inline-sciter.py
-          sed -i 's/branch = "dyn"/branch = "dyn_x86"/g' ./Cargo.toml
-          cargo update -p sciter-rs --precise 674e07d3066ca9a92ced3816203ab6b652629d1e
-          cargo build --locked --features inline,vram,hwcodec --release --bins
-          mkdir -p ./Release
-          mv ./target/release/rustdesk.exe ./Release/rustdesk.exe
-          curl -LJ -o ./Release/sciter.dll https://github.com/c-smile/sciter-sdk/raw/master/bin.win/x32/sciter.dll
-          curl -LJ -o ./usbmmidd_v2.zip https://github.com/rustdesk-org/rdev/releases/download/usbmmidd_v2/usbmmidd_v2.zip
-          unzip usbmmidd_v2.zip
-          # deviceinstaller64.exe is kept: the x86 exe cannot install drivers when running on x64.
-          rm -rf ./usbmmidd_v2/deviceinstaller.exe ./usbmmidd_v2/usbmmidd.bat
-          mv ./usbmmidd_v2 ./Release || true
+          set -o pipefail
+          {
+              python3 res/inline-sciter.py
+              sed -i 's/branch = "dyn"/branch = "dyn_x86"/g' ./Cargo.toml
+              cargo update -p sciter-rs --precise 674e07d3066ca9a92ced3816203ab6b652629d1e
+              cargo build --locked --features inline,vram,hwcodec --release --bins
+              mkdir -p ./Release
+              mv ./target/release/rustdesk.exe ./Release/rustdesk.exe
+              curl -LJ -o ./Release/sciter.dll https://github.com/c-smile/sciter-sdk/raw/master/bin.win/x32/sciter.dll
+              curl -LJ -o ./usbmmidd_v2.zip https://github.com/rustdesk-org/rdev/releases/download/usbmmidd_v2/usbmmidd_v2.zip
+              unzip usbmmidd_v2.zip
+              # deviceinstaller64.exe is kept: the x86 exe cannot install drivers when running on x64.
+              rm -rf ./usbmmidd_v2/deviceinstaller.exe ./usbmmidd_v2/usbmmidd.bat
+              mv ./usbmmidd_v2 ./Release || true
+          } 2>&1 | tee build.log
+
+      - name: Show build errors
+        if: failure()
+        shell: bash
+        run: |
+          grep -vE '^[ <>+!-] [a-z_0-9]+ [0-9]' build.log | tail -n 40 | cut -c1-200 | python3 -c "import sys;t=sys.stdin.read().replace('%','%25').replace('\r','').replace('\n','%0A');print('::error title=build.log tail::'+t)"
 
       - name: Build portable executable
         shell: bash
@@ -287,20 +282,6 @@ jobs:
           popd
           mkdir -p ./out
           mv ./target/release/rustdesk-portable-packer.exe ./out/${PKG}-x86.exe
-
-      - name: Smoke test silent install
-        continue-on-error: true
-        shell: pwsh
-        run: |
-          $exe = Resolve-Path ".\out\$($env:PKG)-x86.exe"
-          Start-Process -FilePath $exe -ArgumentList "--silent-install"
-          Start-Sleep -Seconds 90
-          $dir = "C:\Program Files\$($env:APPNAME)"
-          $files = if (Test-Path $dir) { (Get-ChildItem $dir | Select-Object -First 15 | ForEach-Object Name) -join ", " } else { "NO DIR" }
-          $svc = (Get-Service | Where-Object { $_.Name -like "*$($env:APPNAME)*" -or $_.DisplayName -like "*$($env:APPNAME)*" } | ForEach-Object { "$($_.Name)=$($_.Status)" }) -join ", "
-          $running = (Get-Process | Where-Object { $_.ProcessName -like "$($env:APPNAME)*" } | ForEach-Object ProcessName) -join ", "
-          Write-Output "::warning title=install smoke ($env:APPNAME)::dir=$dir files=[$files] services=[$svc] processes=[$running]"
-          if (-not (Test-Path "$dir\$($env:APPNAME).exe")) { Write-Output "::error::$($env:APPNAME).exe missing in install dir" }
 
       - name: Upload artifact
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
