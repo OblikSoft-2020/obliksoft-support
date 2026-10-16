@@ -6,14 +6,11 @@
 - Releases: https://github.com/OblikSoft-2020/obliksoft-support/releases
 - Support: +380 50 264 8400, https://t.me/OblikSoftSupportBot
 
-## Code signing policy
+## Privacy policy
 
-Free code signing provided by [SignPath.io](https://about.signpath.org/), certificate by [SignPath Foundation](https://signpath.org/).
+This program connects only to the OblikSoft ID/relay servers (`obliksoft.com.ua`, `rd.obliksoft.com.ua`) and does not transfer data to any other system. Remote sessions start only on explicit user action. The program adds no analytics or third-party telemetry.
 
-- Authors, reviewers and approvers: Aleksandr Pertsyukh
-- Binaries are built from this repository by GitHub Actions (`.github/workflows/build-obliksoft.yml`); every release is approved manually before signing.
-
-**Privacy policy:** this program connects only to the OblikSoft ID/relay servers (`obliksoft.com.ua`, `rd.obliksoft.com.ua`) and does not transfer data to any other system. Remote sessions start only on explicit user action. The program adds no analytics or third-party telemetry.
+Release binaries are built from this repository by GitHub Actions (`.github/workflows/build-obliksoft.yml`). They are currently not digitally signed, so Windows SmartScreen may show a warning on first run.
 
 ---
 
