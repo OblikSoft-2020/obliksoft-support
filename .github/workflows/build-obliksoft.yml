@@ -196,6 +196,7 @@ jobs:
         variant: [client, staff]
     env:
       OBLIKSOFT_VARIANT: ${{ matrix.variant }}
+      PYTHONUTF8: "1"
       PKG: ${{ matrix.variant == 'staff' && 'OblikSoft-CS-Staff' || 'OblikSoft-CS' }}
       APPNAME: ${{ matrix.variant == 'staff' && 'OblikSoftCSStaff' || 'OblikSoftCS' }}
     runs-on: windows-2022
