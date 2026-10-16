@@ -8,7 +8,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_hbb/common.dart';
 import 'package:flutter_hbb/common/widgets/animated_rotation_widget.dart';
 import 'package:flutter_hbb/common/widgets/custom_password.dart';
-import 'package:flutter_hbb/common/widgets/dialog.dart';
 import 'package:flutter_hbb/consts.dart';
 import 'package:flutter_hbb/desktop/pages/connection_page.dart';
 import 'package:flutter_hbb/desktop/pages/desktop_setting_page.dart';
@@ -52,7 +51,6 @@ class _DesktopHomePageState extends State<DesktopHomePage>
   var watchIsInputMonitoring = false;
   var watchIsCanRecordAudio = false;
   Timer? _updateTimer;
-  Timer? _obliksoftIdTimer;
   bool isCardClosed = false;
 
   final RxBool _editHover = false.obs;
@@ -741,40 +739,9 @@ class _DesktopHomePageState extends State<DesktopHomePage>
     );
   }
 
-  // The customer window is small and not resizable: enlarge it while the ID dialog is open.
-  Future<void> _showObliksoftIdSetup() async {
-    Size? prevSize;
-    try {
-      prevSize = await windowManager.getSize();
-      setResizable(true);
-      await windowManager.setSize(const Size(560, 560));
-    } catch (_) {}
-    obliksoftIdSetupDialog(onClosed: () async {
-      try {
-        if (prevSize != null) {
-          await windowManager.setSize(prevSize);
-          setResizable(false);
-        }
-      } catch (_) {}
-    });
-  }
-
   @override
   void initState() {
     super.initState();
-    _obliksoftIdTimer = Timer.periodic(const Duration(seconds: 3), (timer) {
-      // Customer (incoming-only) build: ask once for EDRPOU + computer number
-      // after the first successful connection to the server.
-      if (!bind.isIncomingOnly() ||
-          bind.mainGetLocalOption(key: kObliksoftIdSetupDone) == 'Y') {
-        timer.cancel();
-        return;
-      }
-      if (gFFI.serverModel.connectStatus > 0 && mounted) {
-        timer.cancel();
-        _showObliksoftIdSetup();
-      }
-    });
     _updateTimer = periodic_immediate(const Duration(seconds: 1), () async {
       await gFFI.serverModel.fetchID();
       final error = await bind.mainGetError();
@@ -950,7 +917,6 @@ class _DesktopHomePageState extends State<DesktopHomePage>
     _uniLinksSubscription?.cancel();
     Get.delete<RxBool>(tag: 'stop-service');
     _updateTimer?.cancel();
-    _obliksoftIdTimer?.cancel();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
