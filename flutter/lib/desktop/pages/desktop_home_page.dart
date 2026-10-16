@@ -741,6 +741,24 @@ class _DesktopHomePageState extends State<DesktopHomePage>
     );
   }
 
+  // The customer window is small and not resizable: enlarge it while the ID dialog is open.
+  Future<void> _showObliksoftIdSetup() async {
+    Size? prevSize;
+    try {
+      prevSize = await windowManager.getSize();
+      setResizable(true);
+      await windowManager.setSize(const Size(560, 560));
+    } catch (_) {}
+    obliksoftIdSetupDialog(onClosed: () async {
+      try {
+        if (prevSize != null) {
+          await windowManager.setSize(prevSize);
+          setResizable(false);
+        }
+      } catch (_) {}
+    });
+  }
+
   @override
   void initState() {
     super.initState();
@@ -754,7 +772,7 @@ class _DesktopHomePageState extends State<DesktopHomePage>
       }
       if (gFFI.serverModel.connectStatus > 0 && mounted) {
         timer.cancel();
-        obliksoftIdSetupDialog();
+        _showObliksoftIdSetup();
       }
     });
     _updateTimer = periodic_immediate(const Duration(seconds: 1), () async {

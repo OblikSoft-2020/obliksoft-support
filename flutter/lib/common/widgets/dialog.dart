@@ -191,7 +191,7 @@ void changeIdDialog() {
 /// start with a letter. "Skip" keeps the random ID.
 const kObliksoftIdSetupDone = 'obliksoft-id-setup-done';
 
-void obliksoftIdSetupDialog() {
+void obliksoftIdSetupDialog({VoidCallback? onClosed}) {
   final codeController = TextEditingController();
   final numController = TextEditingController(text: '01');
   var msg = '';
@@ -226,11 +226,12 @@ void obliksoftIdSetupDialog() {
       if (status.isEmpty) {
         markDone();
         close();
+        onClosed?.call();
         return;
       }
       setState(() {
         isInProgress = false;
-        msg = status.toLowerCase().contains('exist')
+        msg = status.toLowerCase().contains('available')
             ? 'Такий ID вже зайнятий. Оберіть інший номер комп\'ютера.'
             : translate(status);
       });
@@ -239,6 +240,7 @@ void obliksoftIdSetupDialog() {
     skip() {
       markDone();
       close();
+      onClosed?.call();
     }
 
     return CustomAlertDialog(

@@ -1499,6 +1499,28 @@ pub async fn change_id_shared(id: String, old_id: String) -> String {
     res
 }
 
+/// Apply a new ID locally. The server registers it on the next UDP `RegisterPk`.
+/// If the ID is already used by another device the server answers UUID_MISMATCH and the
+/// client silently falls back to a random ID, so we watch for that for a few seconds.
+#[cfg(not(any(target_os = "android", target_os = "ios")))]
+async fn obliksoft_apply_id(id: String, old_id: String) -> &'static str {
+    if id == old_id {
+        return "";
+    }
+    if crate::ipc::set_config_async("id", id.clone()).await.is_err() {
+        return UNKNOWN_ERROR;
+    }
+    for _ in 0..24 {
+        tokio::time::sleep(std::time::Duration::from_millis(500)).await;
+        if let Ok(Some(cur)) = crate::ipc::get_config("id").await {
+            if !cur.is_empty() && cur != id {
+                return "Not available";
+            }
+        }
+    }
+    ""
+}
+
 pub async fn change_id_shared_(id: String, old_id: String) -> &'static str {
     if !hbb_common::is_valid_custom_id(&id) {
         log::debug!(
@@ -1509,6 +1531,13 @@ pub async fn change_id_shared_(id: String, old_id: String) -> &'static str {
         let bom = id.trim_start_matches('\u{FEFF}');
         log::debug!("bom: {}", hbb_common::is_valid_custom_id(&bom));
         return INVALID_FORMAT;
+    }
+
+    // The open-source hbbs answers a TCP `RegisterPk` (the pre-check below) with NOT_SUPPORT,
+    // so on desktop we apply the ID locally and let the normal UDP registration claim it.
+    #[cfg(not(any(target_os = "android", target_os = "ios")))]
+    {
+        return obliksoft_apply_id(id.clone(), old_id.clone()).await;
     }
 
     #[cfg(not(any(target_os = "android", target_os = "ios")))]
