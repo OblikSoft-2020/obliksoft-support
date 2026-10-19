@@ -34,9 +34,14 @@ jobs:
             cat SHA256SUMS.txt
             # The stable tag must already exist (created manually on the beta commit).
             gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/$DST" --jq .ref
-            gh release create "$DST" --repo "$GITHUB_REPOSITORY" --title "$DST" \
-              --notes "Stable release. Binaries are byte-identical to the tested pre-release $SRC (no rebuild). SHA-256 sums are attached." \
-              *.exe SHA256SUMS.txt
+            if gh release view "$DST" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+              # Release already exists (e.g. overwritten by an accidental rebuild): restore the tested binaries.
+              gh release upload "$DST" --repo "$GITHUB_REPOSITORY" --clobber *.exe SHA256SUMS.txt
+            else
+              gh release create "$DST" --repo "$GITHUB_REPOSITORY" --title "$DST" \
+                --notes "Stable release. Binaries are byte-identical to the tested pre-release $SRC (no rebuild). SHA-256 sums are attached." \
+                *.exe SHA256SUMS.txt
+            fi
             gh release view "$DST" --repo "$GITHUB_REPOSITORY" --json assets,isPrerelease --jq '{pre: .isPrerelease, assets: [.assets[].name]}'
           } 2>&1 | tee /tmp/promote.log
 
