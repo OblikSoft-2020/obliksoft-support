@@ -16,6 +16,11 @@ jobs:
     env:
       GH_TOKEN: ${{ github.token }}
     steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          fetch-depth: 0
+
       - name: Promote
         shell: bash
         run: |
@@ -32,7 +37,12 @@ jobs:
             test "$(ls *.exe | wc -l)" -ge 4
             sha256sum *.exe > SHA256SUMS.txt
             cat SHA256SUMS.txt
-            gh release create "$DST" --repo "$GITHUB_REPOSITORY" --target "$SHA" --title "$DST" \
+            # Create the stable tag first (pushes made with GITHUB_TOKEN do not start other workflows)
+            git config user.name "github-actions"
+            git config user.email "github-actions@users.noreply.github.com"
+            git tag "$DST" "$SHA"
+            git push origin "refs/tags/$DST"
+            gh release create "$DST" --repo "$GITHUB_REPOSITORY" --title "$DST" \
               --notes "Stable release. Binaries are byte-identical to the tested pre-release $SRC (no rebuild). SHA-256 sums are attached." \
               *.exe SHA256SUMS.txt
             gh release view "$DST" --repo "$GITHUB_REPOSITORY" --json assets,isPrerelease --jq '{pre: .isPrerelease, assets: [.assets[].name]}'
