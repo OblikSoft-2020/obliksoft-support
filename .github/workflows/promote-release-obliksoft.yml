@@ -17,18 +17,28 @@ jobs:
       GH_TOKEN: ${{ github.token }}
     steps:
       - name: Promote
+        shell: bash
         run: |
-          SRC="${GITHUB_REF_NAME#promote-}"
-          DST="${SRC%-beta*}"
-          if [ "$SRC" = "$DST" ]; then echo "::error::$SRC is not a beta tag"; exit 1; fi
-          SHA=$(gh api "repos/$GITHUB_REPOSITORY/commits/$SRC" --jq .sha)
-          mkdir dl && cd dl
-          gh release download "$SRC" --repo "$GITHUB_REPOSITORY"
-          ls -l
-          test "$(ls *.exe | wc -l)" -ge 4
-          sha256sum * > SHA256SUMS.txt
-          cat SHA256SUMS.txt
-          gh release create "$DST" --repo "$GITHUB_REPOSITORY" --target "$SHA" --title "$DST" \
-            --notes "Stable release. Binaries are byte-identical to the tested pre-release $SRC (no rebuild). SHA-256 sums are attached." \
-            *.exe SHA256SUMS.txt
-          gh release view "$DST" --repo "$GITHUB_REPOSITORY" --json assets,isPrerelease --jq '{pre: .isPrerelease, assets: [.assets[].name]}'
+          set -o pipefail
+          {
+            set -ex
+            SRC="${GITHUB_REF_NAME#promote-}"
+            DST="${SRC%-beta*}"
+            if [ "$SRC" = "$DST" ]; then echo "$SRC is not a beta tag"; exit 1; fi
+            SHA=$(gh api "repos/$GITHUB_REPOSITORY/commits/$SRC" --jq .sha)
+            mkdir dl && cd dl
+            gh release download "$SRC" --repo "$GITHUB_REPOSITORY"
+            ls -l
+            test "$(ls *.exe | wc -l)" -ge 4
+            sha256sum *.exe > SHA256SUMS.txt
+            cat SHA256SUMS.txt
+            gh release create "$DST" --repo "$GITHUB_REPOSITORY" --target "$SHA" --title "$DST" \
+              --notes "Stable release. Binaries are byte-identical to the tested pre-release $SRC (no rebuild). SHA-256 sums are attached." \
+              *.exe SHA256SUMS.txt
+            gh release view "$DST" --repo "$GITHUB_REPOSITORY" --json assets,isPrerelease --jq '{pre: .isPrerelease, assets: [.assets[].name]}'
+          } 2>&1 | tee /tmp/promote.log
+
+      - name: Show errors
+        if: failure()
+        run: |
+          tail -n 25 /tmp/promote.log | cut -c1-200 | python3 -c "import sys;t=sys.stdin.read().replace('%','%25').replace('\r','').replace('\n','%0A');print('::error title=promote log::'+t)"
