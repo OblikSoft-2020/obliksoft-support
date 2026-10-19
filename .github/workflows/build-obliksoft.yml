@@ -13,7 +13,9 @@ on:
         default: "obliksoft-latest"
   push:
     tags:
-      - "obliksoft-v*"
+      # Only pre-release tags build; a stable tag is created by promoting a tested beta (no rebuild).
+      - "obliksoft-v*-beta*"
+      - "obliksoft-v*-rc*"
 
 permissions:
   contents: read
