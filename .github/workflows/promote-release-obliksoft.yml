@@ -1,0 +1,34 @@
+name: Promote beta release to stable (OblikSoft)
+
+# Push a tag named promote-<beta-tag> (for example promote-obliksoft-v1.1.0-beta1) to publish
+# the SAME binaries of that pre-release as the stable release obliksoft-v1.1.0 (no rebuild).
+on:
+  push:
+    tags:
+      - "promote-*"
+
+permissions:
+  contents: write
+
+jobs:
+  promote:
+    runs-on: ubuntu-22.04
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Promote
+        run: |
+          SRC="${GITHUB_REF_NAME#promote-}"
+          DST="${SRC%-beta*}"
+          if [ "$SRC" = "$DST" ]; then echo "::error::$SRC is not a beta tag"; exit 1; fi
+          SHA=$(gh api "repos/$GITHUB_REPOSITORY/commits/$SRC" --jq .sha)
+          mkdir dl && cd dl
+          gh release download "$SRC" --repo "$GITHUB_REPOSITORY"
+          ls -l
+          test "$(ls *.exe | wc -l)" -ge 4
+          sha256sum * > SHA256SUMS.txt
+          cat SHA256SUMS.txt
+          gh release create "$DST" --repo "$GITHUB_REPOSITORY" --target "$SHA" --title "$DST" \
+            --notes "Stable release. Binaries are byte-identical to the tested pre-release $SRC (no rebuild). SHA-256 sums are attached." \
+            *.exe SHA256SUMS.txt
+          gh release view "$DST" --repo "$GITHUB_REPOSITORY" --json assets,isPrerelease --jq '{pre: .isPrerelease, assets: [.assets[].name]}'
